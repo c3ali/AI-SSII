@@ -5,6 +5,9 @@ import { Providers } from './providers'
 export const metadata: Metadata = {
   title: 'AI-SSII - AI-Powered Application Builder',
   description: 'Transform your ideas into fully functional applications with AI agents',
+  icons: {
+    icon: '/favicon.svg',
+  },
 }
 
 export default function RootLayout({
