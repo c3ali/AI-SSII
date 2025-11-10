@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card, CardContent } from '@/components/ui/card'
 import { PromptInput } from '@/components/prompt/PromptInput'
 import { TokenSlider } from '@/components/prompt/TokenSlider'
 import { TargetSelector } from '@/components/prompt/TargetSelector'
@@ -66,28 +65,34 @@ export default function LandingPage() {
 
   return (
     <>
-      <Toaster position="top-right" />
+      <Toaster position="top-right" theme="dark" />
 
-      <div className="max-w-5xl mx-auto space-y-8">
+      <div className="max-w-6xl mx-auto space-y-12">
         {/* Header */}
-        <div className="text-center space-y-3">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            🤖 SSII AI Studio
-          </h1>
-          <p className="text-xl text-muted-foreground">
-            Transformez un brief en application en 12 minutes
+        <div className="text-center space-y-6 pt-8">
+          <div className="inline-block">
+            <h1 className="text-6xl md:text-7xl font-black tracking-tight">
+              <span className="gradient-text">SSII AI Studio</span>
+            </h1>
+            <div className="h-1 w-full bg-gradient-to-r from-purple-500 via-blue-500 to-emerald-500 rounded-full mt-4" />
+          </div>
+
+          <p className="text-2xl md:text-3xl text-foreground/80 font-light max-w-2xl mx-auto leading-relaxed">
+            Transformez un brief en application
+            <span className="block gradient-text font-semibold mt-2">en 12 minutes chrono ⚡</span>
           </p>
+
           {connected && (
-            <p className="text-xs text-green-600 flex items-center justify-center gap-1">
-              <span className="inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              Connecté au temps réel
-            </p>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-emerald-500/30 glow">
+              <span className="inline-block w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-lg shadow-emerald-500/50" />
+              <span className="text-sm text-emerald-400 font-medium">Connecté en temps réel</span>
+            </div>
           )}
         </div>
 
         {/* Main Card */}
-        <Card>
-          <CardContent className="pt-6 space-y-6">
+        <div className="glass-strong rounded-2xl p-8 shadow-2xl border-white/10">
+          <div className="space-y-8">
             {/* Prompt Input */}
             <PromptInput
               value={brief}
@@ -96,11 +101,12 @@ export default function LandingPage() {
             />
 
             {/* Advanced Settings */}
-            <details className="border rounded-lg">
-              <summary className="cursor-pointer p-4 font-medium hover:bg-accent rounded-lg transition-colors">
-                ⚙️ Paramètres avancés
+            <details className="glass rounded-xl overflow-hidden transition-all duration-300 hover:border-white/20">
+              <summary className="cursor-pointer p-5 font-semibold hover:bg-white/5 transition-all duration-200 flex items-center gap-3 text-lg">
+                <span className="text-2xl">⚙️</span>
+                <span>Paramètres avancés</span>
               </summary>
-              <div className="p-4 space-y-6 border-t">
+              <div className="p-6 space-y-8 border-t border-white/10 bg-white/5">
                 <TokenSlider
                   value={tokens}
                   onChange={setTokens}
@@ -123,17 +129,23 @@ export default function LandingPage() {
 
             {/* Results */}
             {project?.urls && (
-              <div className="p-4 bg-green-50 border border-green-200 rounded-lg space-y-3">
-                <h3 className="font-semibold text-green-900">✅ Application générée avec succès !</h3>
-                <div className="flex flex-wrap gap-2">
+              <div className="glass-strong rounded-2xl p-6 border border-emerald-500/30 glow-strong animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/30">
+                    <span className="text-2xl">✅</span>
+                  </div>
+                  <h3 className="text-xl font-bold gradient-text">Application générée avec succès !</h3>
+                </div>
+                <div className="flex flex-wrap gap-3">
                   {project.urls.github && (
                     <a
                       href={project.urls.github}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-4 py-2 bg-white border border-green-300 rounded-md hover:bg-green-50 transition-colors"
+                      className="group px-6 py-3 glass rounded-xl hover:glass-strong transition-all duration-300 flex items-center gap-3 hover:scale-105 hover:glow"
                     >
-                      📦 Code GitHub
+                      <span className="text-xl">📦</span>
+                      <span className="font-medium group-hover:gradient-text transition-all">Code GitHub</span>
                     </a>
                   )}
                   {project.urls.preview && (
@@ -141,9 +153,10 @@ export default function LandingPage() {
                       href={project.urls.preview}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-4 py-2 bg-white border border-green-300 rounded-md hover:bg-green-50 transition-colors"
+                      className="group px-6 py-3 glass rounded-xl hover:glass-strong transition-all duration-300 flex items-center gap-3 hover:scale-105 hover:glow"
                     >
-                      🌐 Preview
+                      <span className="text-xl">🌐</span>
+                      <span className="font-medium group-hover:gradient-text transition-all">Preview</span>
                     </a>
                   )}
                   {project.urls.dashboard && (
@@ -151,46 +164,43 @@ export default function LandingPage() {
                       href={project.urls.dashboard}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-4 py-2 bg-white border border-green-300 rounded-md hover:bg-green-50 transition-colors"
+                      className="group px-6 py-3 glass rounded-xl hover:glass-strong transition-all duration-300 flex items-center gap-3 hover:scale-105 hover:glow"
                     >
-                      📊 Dashboard
+                      <span className="text-xl">📊</span>
+                      <span className="font-medium group-hover:gradient-text transition-all">Dashboard</span>
                     </a>
                   )}
                 </div>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Value Proposition */}
-        <div className="grid md:grid-cols-3 gap-4 text-center">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-3xl mb-2">⚡</div>
-              <h3 className="font-semibold mb-1">12 minutes</h3>
-              <p className="text-sm text-muted-foreground">
-                De l'idée à la production
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-3xl mb-2">💰</div>
-              <h3 className="font-semibold mb-1">3k€ vs 80k€</h3>
-              <p className="text-sm text-muted-foreground">
-                27x moins cher qu'une SSII
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-3xl mb-2">🤖</div>
-              <h3 className="font-semibold mb-1">6 agents IA</h3>
-              <p className="text-sm text-muted-foreground">
-                Director, Architect, Dev, Security, QA, DevOps
-              </p>
-            </CardContent>
-          </Card>
+        <div className="grid md:grid-cols-3 gap-6">
+          <div className="group glass rounded-2xl p-8 text-center hover:glass-strong transition-all duration-300 hover:scale-105 hover:glow border-purple-500/20 hover:border-purple-500/40">
+            <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">⚡</div>
+            <h3 className="text-2xl font-bold mb-2 gradient-text">12 minutes</h3>
+            <p className="text-foreground/60 text-base">
+              De l'idée à la production
+            </p>
+          </div>
+
+          <div className="group glass rounded-2xl p-8 text-center hover:glass-strong transition-all duration-300 hover:scale-105 hover:glow border-blue-500/20 hover:border-blue-500/40">
+            <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">💰</div>
+            <h3 className="text-2xl font-bold mb-2 gradient-text">3k€ vs 80k€</h3>
+            <p className="text-foreground/60 text-base">
+              27x moins cher qu'une SSII
+            </p>
+          </div>
+
+          <div className="group glass rounded-2xl p-8 text-center hover:glass-strong transition-all duration-300 hover:scale-105 hover:glow border-emerald-500/20 hover:border-emerald-500/40">
+            <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">🤖</div>
+            <h3 className="text-2xl font-bold mb-2 gradient-text">6 agents IA</h3>
+            <p className="text-foreground/60 text-base">
+              Director, Architect, Dev, Security, QA, DevOps
+            </p>
+          </div>
         </div>
       </div>
 
