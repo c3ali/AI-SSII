@@ -1,0 +1,89 @@
+// Prisma Schema for SSII IA Platform
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  name      String
+  password  String
+  projects  Project[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("users")
+}
+
+model Project {
+  id               String            @id @default(uuid())
+  userId           String
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name             String
+  brief            String            @db.Text
+  status           ProjectStatus     @default(PENDING)
+  stack            String?
+  budget           Int?
+  progress         Int               @default(0)
+  deployUrl        String?
+  databaseUrl      String?
+  outputs          Json?
+  agentExecutions  AgentExecution[]
+  checkpoints      Checkpoint[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  @@index([userId, status])
+  @@index([createdAt])
+  @@map("projects")
+}
+
+model AgentExecution {
+  id          String    @id @default(uuid())
+  projectId   String
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  agentName   String
+  status      String
+  input       Json?
+  output      Json?
+  error       String?   @db.Text
+  logs        String[]  @default([])
+  startedAt   DateTime
+  completedAt DateTime?
+  duration    Int       @default(0)
+  tokensUsed  Int       @default(0)
+  cost        Float     @default(0)
+
+  @@index([projectId, agentName])
+  @@index([status])
+  @@map("agent_executions")
+}
+
+model Checkpoint {
+  id        String   @id @default(uuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  agentName String
+  data      Json
+  approved  Boolean?
+  feedback  String?  @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([projectId])
+  @@map("checkpoints")
+}
+
+enum ProjectStatus {
+  PENDING
+  RUNNING
+  WAITING_CHECKPOINT
+  SUCCESS
+  FAILED
+  CANCELLED
+}

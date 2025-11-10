@@ -1,0 +1,161 @@
+{
+  "users": [
+    {
+      "id": "test-user-1",
+      "email": "test1@ssii.com",
+      "name": "Test User 1",
+      "password": "test123"
+    },
+    {
+      "id": "test-user-2",
+      "email": "test2@ssii.com",
+      "name": "Test User 2",
+      "password": "test456"
+    }
+  ],
+  "projects": [
+    {
+      "id": "proj-1",
+      "name": "E-commerce Platform",
+      "brief": "Create a modern e-commerce platform with Stripe payments, product catalog, shopping cart, and order management",
+      "userId": "test-user-1",
+      "status": "SUCCESS",
+      "stack": "NEXTJS",
+      "budget": 45,
+      "progress": 100,
+      "deployUrl": "https://ecommerce-test.vercel.app"
+    },
+    {
+      "id": "proj-2",
+      "name": "Blog Platform",
+      "brief": "Build a blogging platform with markdown support, comments, and SEO optimization",
+      "userId": "test-user-1",
+      "status": "RUNNING",
+      "stack": "NEXTJS",
+      "budget": 30,
+      "progress": 65
+    },
+    {
+      "id": "proj-3",
+      "name": "Portfolio Website",
+      "brief": "Create a personal portfolio website with project showcase and contact form",
+      "userId": "test-user-2",
+      "status": "SUCCESS",
+      "stack": "NEXTJS",
+      "budget": 20,
+      "progress": 100,
+      "deployUrl": "https://portfolio-test.vercel.app"
+    }
+  ],
+  "agentOutputs": {
+    "director": {
+      "title": "E-commerce Platform",
+      "objectives": [
+        "Enable online product sales",
+        "Integrate Stripe payments",
+        "Manage product inventory",
+        "Handle order processing"
+      ],
+      "userStories": [
+        {
+          "title": "User can browse products",
+          "description": "As a customer, I want to browse available products so that I can find items to purchase",
+          "acceptanceCriteria": [
+            "Products are displayed in a responsive grid",
+            "Each product shows image, name, price, and description",
+            "Users can filter products by category",
+            "Users can search products by name"
+          ],
+          "estimationHours": 4,
+          "priority": "Must"
+        },
+        {
+          "title": "User can add items to cart",
+          "description": "As a customer, I want to add products to my cart so that I can purchase multiple items",
+          "acceptanceCriteria": [
+            "Cart icon shows current item count",
+            "Users can adjust quantities in cart",
+            "Cart persists across sessions",
+            "Cart shows total price"
+          ],
+          "estimationHours": 3,
+          "priority": "Must"
+        },
+        {
+          "title": "User can checkout with Stripe",
+          "description": "As a customer, I want to securely pay for my order using Stripe",
+          "acceptanceCriteria": [
+            "Stripe payment form is integrated",
+            "Order is created after successful payment",
+            "User receives email confirmation",
+            "Payment is secure and PCI compliant"
+          ],
+          "estimationHours": 4,
+          "priority": "Must"
+        }
+      ],
+      "timeline": 2,
+      "budget": 45
+    },
+    "architect": {
+      "stack": "NEXTJS",
+      "frontend": {
+        "framework": "Next.js 14",
+        "styling": "Tailwind CSS",
+        "stateManagement": "Zustand",
+        "components": "shadcn/ui"
+      },
+      "backend": {
+        "framework": "Next.js API Routes",
+        "orm": "Prisma",
+        "authentication": "NextAuth.js",
+        "payments": "Stripe"
+      },
+      "database": {
+        "type": "PostgreSQL",
+        "provider": "Supabase",
+        "schema": {
+          "tables": [
+            {
+              "name": "products",
+              "columns": [
+                { "name": "id", "type": "uuid", "primary": true },
+                { "name": "name", "type": "string" },
+                { "name": "description", "type": "text" },
+                { "name": "price", "type": "decimal" },
+                { "name": "image_url", "type": "string" },
+                { "name": "category", "type": "string" },
+                { "name": "stock", "type": "integer" },
+                { "name": "created_at", "type": "timestamp" }
+              ],
+              "indexes": ["category", "name"]
+            },
+            {
+              "name": "orders",
+              "columns": [
+                { "name": "id", "type": "uuid", "primary": true },
+                { "name": "user_id", "type": "uuid" },
+                { "name": "total", "type": "decimal" },
+                { "name": "status", "type": "string" },
+                { "name": "stripe_payment_id", "type": "string" },
+                { "name": "created_at", "type": "timestamp" }
+              ],
+              "relations": [
+                { "table": "users", "type": "many-to-one", "column": "user_id" }
+              ]
+            }
+          ]
+        }
+      },
+      "infrastructure": {
+        "hosting": "Vercel",
+        "cdn": "Vercel CDN",
+        "storage": "Supabase Storage"
+      },
+      "architecture": {
+        "pattern": "Monorepo",
+        "layers": ["Presentation", "Business Logic", "Data Access"]
+      }
+    }
+  }
+}
