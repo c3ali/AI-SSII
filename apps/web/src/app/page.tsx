@@ -1,182 +1,205 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import Link from 'next/link'
-import { formatDate } from '@/lib/utils'
+'use client'
 
-async function getStats() {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/stats`, {
-      cache: 'no-store',
-    })
-    if (!res.ok) return null
-    return res.json()
-  } catch (error) {
-    console.error('Error fetching stats:', error)
-    return null
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Card, CardContent } from '@/components/ui/card'
+import { PromptInput } from '@/components/prompt/PromptInput'
+import { TokenSlider } from '@/components/prompt/TokenSlider'
+import { TargetSelector } from '@/components/prompt/TargetSelector'
+import { GenerateButton } from '@/components/prompt/GenerateButton'
+import { ProgressPanel } from '@/components/prompt/ProgressPanel'
+import { useProject } from '@/hooks/useProject'
+import { useRealtime } from '@/hooks/useRealtime'
+import { TOKEN_COSTS, TARGETS } from '@/lib/constants'
+import { Toaster } from 'sonner'
+
+export default function LandingPage() {
+  const router = useRouter()
+  const [brief, setBrief] = useState('')
+  const [tokens, setTokens] = useState(TOKEN_COSTS.DEFAULT)
+  const [target, setTarget] = useState(TARGETS.BOTH)
+  const [showProgress, setShowProgress] = useState(false)
+
+  const { createProject, loading, project, projectId } = useProject()
+  const { connected, events } = useRealtime({
+    projectId: projectId || undefined,
+    onEvent: (event) => {
+      if (event.type === 'human_decision_needed') {
+        router.push(`/decision/${event.decision_id}`)
+      } else if (event.type === 'project_completed') {
+        setShowProgress(false)
+      }
+    },
+  })
+
+  const handleGenerate = async () => {
+    if (brief.length < 50) {
+      return
+    }
+
+    try {
+      setShowProgress(true)
+      await createProject({
+        brief,
+        budget_tokens: tokens,
+        target: target as any,
+      })
+    } catch (error) {
+      setShowProgress(false)
+    }
   }
-}
 
-export default async function DashboardPage() {
-  const stats = await getStats()
+  const getButtonState = () => {
+    if (!loading && !project) return 'idle'
+    if (project?.status === 'deployed') return 'done'
 
-  if (!stats) {
-    return (
-      <div className="space-y-6">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
-          <p className="text-sm text-yellow-800">
-            ⚠️ Base de données non connectée. Veuillez configurer la variable DATABASE_URL dans Vercel.
-          </p>
-        </div>
-      </div>
-    )
+    const statusMap: Record<string, any> = {
+      analyzing: 'analyzing',
+      designing: 'designing',
+      coding: 'coding',
+      testing: 'testing',
+      deploying: 'deploying',
+    }
+
+    return statusMap[project?.status || 'analyzing'] || 'idle'
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Vue d'ensemble de vos projets et statistiques
-        </p>
-      </div>
+    <>
+      <Toaster position="top-right" />
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Projets</CardTitle>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              className="h-4 w-4 text-muted-foreground"
-            >
-              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-              <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-            </svg>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalProjects}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.activeProjects} en cours
+      <div className="max-w-5xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="text-center space-y-3">
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            🤖 SSII AI Studio
+          </h1>
+          <p className="text-xl text-muted-foreground">
+            Transformez un brief en application en 12 minutes
+          </p>
+          {connected && (
+            <p className="text-xs text-green-600 flex items-center justify-center gap-1">
+              <span className="inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              Connecté au temps réel
             </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Projets Terminés</CardTitle>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              className="h-4 w-4 text-muted-foreground"
-            >
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-            </svg>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.completedProjects}</div>
-            <p className="text-xs text-muted-foreground">
-              Taux de succès: {stats.successRate}%
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Utilisateurs</CardTitle>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              className="h-4 w-4 text-muted-foreground"
-            >
-              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-              <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-            </svg>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalUsers}</div>
-            <p className="text-xs text-muted-foreground">Total d'utilisateurs</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Exécutions IA</CardTitle>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              className="h-4 w-4 text-muted-foreground"
-            >
-              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-            </svg>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalExecutions}</div>
-            <p className="text-xs text-muted-foreground">Agents exécutés</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Recent Projects */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Projets Récents</CardTitle>
-          <CardDescription>Derniers projets créés sur la plateforme</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {stats.recentProjects.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Aucun projet pour le moment.</p>
-          ) : (
-            <div className="space-y-4">
-              {stats.recentProjects.map((project: any) => (
-                <Link
-                  key={project.id}
-                  href={`/projects/${project.id}`}
-                  className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0 hover:bg-accent/50 rounded p-2 transition-colors"
-                >
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium leading-none">{project.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {project.user?.name} • {formatDate(project.createdAt)}
-                    </p>
-                  </div>
-                  <Badge variant={
-                    project.status === 'SUCCESS' ? 'success' :
-                    project.status === 'RUNNING' ? 'default' :
-                    project.status === 'FAILED' ? 'destructive' :
-                    'secondary'
-                  }>
-                    {project.status}
-                  </Badge>
-                </Link>
-              ))}
-            </div>
           )}
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+
+        {/* Main Card */}
+        <Card>
+          <CardContent className="pt-6 space-y-6">
+            {/* Prompt Input */}
+            <PromptInput
+              value={brief}
+              onChange={setBrief}
+              disabled={loading}
+            />
+
+            {/* Advanced Settings */}
+            <details className="border rounded-lg">
+              <summary className="cursor-pointer p-4 font-medium hover:bg-accent rounded-lg transition-colors">
+                ⚙️ Paramètres avancés
+              </summary>
+              <div className="p-4 space-y-6 border-t">
+                <TokenSlider
+                  value={tokens}
+                  onChange={setTokens}
+                  disabled={loading}
+                />
+                <TargetSelector
+                  value={target}
+                  onChange={setTarget}
+                  disabled={loading}
+                />
+              </div>
+            </details>
+
+            {/* Generate Button */}
+            <GenerateButton
+              state={getButtonState()}
+              onClick={handleGenerate}
+              disabled={brief.length < 50 || loading}
+            />
+
+            {/* Results */}
+            {project?.urls && (
+              <div className="p-4 bg-green-50 border border-green-200 rounded-lg space-y-3">
+                <h3 className="font-semibold text-green-900">✅ Application générée avec succès !</h3>
+                <div className="flex flex-wrap gap-2">
+                  {project.urls.github && (
+                    <a
+                      href={project.urls.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 bg-white border border-green-300 rounded-md hover:bg-green-50 transition-colors"
+                    >
+                      📦 Code GitHub
+                    </a>
+                  )}
+                  {project.urls.preview && (
+                    <a
+                      href={project.urls.preview}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 bg-white border border-green-300 rounded-md hover:bg-green-50 transition-colors"
+                    >
+                      🌐 Preview
+                    </a>
+                  )}
+                  {project.urls.dashboard && (
+                    <a
+                      href={project.urls.dashboard}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 bg-white border border-green-300 rounded-md hover:bg-green-50 transition-colors"
+                    >
+                      📊 Dashboard
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Value Proposition */}
+        <div className="grid md:grid-cols-3 gap-4 text-center">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-3xl mb-2">⚡</div>
+              <h3 className="font-semibold mb-1">12 minutes</h3>
+              <p className="text-sm text-muted-foreground">
+                De l'idée à la production
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-3xl mb-2">💰</div>
+              <h3 className="font-semibold mb-1">3k€ vs 80k€</h3>
+              <p className="text-sm text-muted-foreground">
+                27x moins cher qu'une SSII
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-3xl mb-2">🤖</div>
+              <h3 className="font-semibold mb-1">6 agents IA</h3>
+              <p className="text-sm text-muted-foreground">
+                Director, Architect, Dev, Security, QA, DevOps
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Progress Panel */}
+      <ProgressPanel
+        isOpen={showProgress}
+        currentStatus={project?.status || 'analyzing'}
+        progress={project?.progress}
+      />
+    </>
   )
 }
