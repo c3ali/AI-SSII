@@ -1,0 +1,45 @@
+{
+  "name": "@ssii/database",
+  "version": "1.0.0",
+  "description": "Database layer with Prisma ORM for SSII IA Platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:prod": "prisma migrate deploy",
+    "db:studio": "prisma studio",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:reset": "tsx scripts/reset.ts",
+    "db:backup": "tsx scripts/backup.ts",
+    "db:health": "tsx scripts/health.ts",
+    "clean": "rm -rf dist node_modules .prisma"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.7.0",
+    "bcrypt": "^5.1.1",
+    "redis": "^4.6.11"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/node": "^20.10.4",
+    "prisma": "^5.7.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  },
+  "keywords": [
+    "prisma",
+    "database",
+    "postgresql",
+    "redis",
+    "orm"
+  ],
+  "author": "SSII",
+  "license": "MIT"
+}

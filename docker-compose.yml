@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: ssii-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ssii_user
+      POSTGRES_PASSWORD: ssii_pass_2024
+      POSTGRES_DB: ssii_ia_platform
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ssii_user"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ssii-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: ssii-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - ssii-network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: ssii-pgadmin
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@ssii.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ssii-network
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  ssii-network:
+    driver: bridge

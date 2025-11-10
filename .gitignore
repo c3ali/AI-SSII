@@ -1,0 +1,103 @@
+# ============================================
+# DEPENDENCIES
+# ============================================
+node_modules/
+.pnp
+.pnp.js
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# ============================================
+# ENVIRONMENT VARIABLES
+# ============================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ============================================
+# BUILD OUTPUTS
+# ============================================
+dist/
+build/
+*.tsbuildinfo
+.next/
+out/
+
+# ============================================
+# LOGS
+# ============================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+pnpm-debug.log*
+
+# ============================================
+# TESTING
+# ============================================
+coverage/
+*.lcov
+.nyc_output
+
+# ============================================
+# DATABASE
+# ============================================
+*.db
+*.sqlite
+*.sqlite3
+
+# Prisma
+.prisma/
+prisma/migrations/**/*.sql
+!prisma/migrations/**/migration.sql
+
+# Backups
+backups/
+*.sql
+*.sql.gz
+*.dump
+
+# ============================================
+# DOCKER
+# ============================================
+postgres_data/
+redis_data/
+pgadmin_data/
+
+# ============================================
+# IDEs & EDITORS
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# ============================================
+# TEMPORARY FILES
+# ============================================
+tmp/
+temp/
+*.tmp
+
+# ============================================
+# MISC
+# ============================================
+.cache/
+.turbo/
+.vercel/

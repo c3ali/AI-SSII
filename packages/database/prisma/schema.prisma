@@ -1,0 +1,282 @@
+// packages/database/prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// UTILISATEURS
+// ============================================
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  name          String?
+  role          Role      @default(USER)
+  avatar        String?
+
+  // Relations
+  projects      Project[]
+  executions    Execution[]
+  comments      Comment[]
+
+  // Metadata
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+
+  @@index([email])
+  @@map("users")
+}
+
+// ============================================
+// PROJETS
+// ============================================
+model Project {
+  id            String        @id @default(cuid())
+  name          String
+  brief         String        @db.Text
+  status        ProjectStatus @default(DRAFT)
+
+  // Owner
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Configuration
+  config        Json          @default("{}")
+  stack         Stack         @default(NEXTJS)
+  budget        Float         @default(50)
+  timeline      Int           @default(7) // jours
+
+  // Outputs des agents (JSON stocké)
+  plan          Json?         // Director output
+  architecture  Json?         // Architect output
+  codebase      Json?         // Developer output
+  security      Json?         // Security output
+  tests         Json?         // QA output
+  deployment    Json?         // DevOps output
+
+  // URLs générées
+  githubUrl     String?
+  deployUrl     String?
+  docsUrl       String?
+
+  // Relations
+  executions    Execution[]
+  metrics       Metrics?
+  templates     Template[]
+  comments      Comment[]
+  files         File[]
+
+  // Timestamps
+  startedAt     DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([userId, status])
+  @@index([createdAt])
+  @@index([status])
+  @@map("projects")
+}
+
+// ============================================
+// EXÉCUTIONS D'AGENTS
+// ============================================
+model Execution {
+  id            String          @id @default(cuid())
+
+  // Liens
+  projectId     String
+  project       Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId        String?
+  user          User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  // Agent info
+  agent         Agent
+  status        ExecutionStatus @default(PENDING)
+  progress      Int             @default(0)
+
+  // Data
+  input         Json
+  output        Json?
+  error         String?         @db.Text
+  logs          Json            @default("[]")
+
+  // Performance
+  duration      Int?            // millisecondes
+  tokensUsed    Int?
+  cost          Float?
+
+  // Timestamps
+  startedAt     DateTime        @default(now())
+  completedAt   DateTime?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@index([projectId, agent])
+  @@index([status])
+  @@index([createdAt])
+  @@map("executions")
+}
+
+// ============================================
+// MÉTRIQUES
+// ============================================
+model Metrics {
+  id            String    @id @default(cuid())
+  projectId     String    @unique
+  project       Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  // Qualité code
+  coverage      Float?    // 0-100
+  complexity    Float?    // Cyclomatic
+  linesOfCode   Int?
+  testsPassed   Int?
+  testsTotal    Int?
+
+  // Performance
+  lighthouse    Float?    // 0-100
+  bundleSize    Float?    // KB
+  loadTime      Float?    // ms
+
+  // Sécurité
+  owaspScore    Float?    // 0-10
+  vulnerabilities Int?
+
+  // Coûts
+  estimatedCost Float?    // €/mois
+  apiTokensUsed Int?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("metrics")
+}
+
+// ============================================
+// TEMPLATES RÉUTILISABLES
+// ============================================
+model Template {
+  id            String           @id @default(cuid())
+  name          String
+  description   String           @db.Text
+  category      TemplateCategory
+
+  // Source
+  projectId     String?
+  project       Project?         @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  // Content
+  brief         String           @db.Text
+  config        Json
+  stack         Stack
+
+  // Stats
+  usageCount    Int              @default(0)
+  rating        Float?           // 0-5
+
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@index([category])
+  @@index([usageCount])
+  @@map("templates")
+}
+
+// ============================================
+// COMMENTAIRES
+// ============================================
+model Comment {
+  id            String    @id @default(cuid())
+  content       String    @db.Text
+
+  projectId     String
+  project       Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([projectId])
+  @@index([userId])
+  @@map("comments")
+}
+
+// ============================================
+// FICHIERS
+// ============================================
+model File {
+  id            String    @id @default(cuid())
+  filename      String
+  mimetype      String
+  size          Int       // bytes
+  url           String
+
+  projectId     String
+  project       Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  uploadedAt    DateTime  @default(now())
+
+  @@index([projectId])
+  @@map("files")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+enum Role {
+  USER
+  ADMIN
+  DEVELOPER
+}
+
+enum ProjectStatus {
+  DRAFT
+  QUEUED
+  RUNNING
+  SUCCESS
+  FAILED
+  CANCELLED
+}
+
+enum Agent {
+  DIRECTOR
+  ARCHITECT
+  DEVELOPER
+  SECURITY
+  QA
+  DEVOPS
+}
+
+enum ExecutionStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+  SKIPPED
+}
+
+enum Stack {
+  NEXTJS
+  REACT_NATIVE
+  EXPO
+  NUXT
+  FLUTTER
+}
+
+enum TemplateCategory {
+  ECOMMERCE
+  SAAS
+  LANDING
+  DASHBOARD
+  MOBILE
+  API
+}
