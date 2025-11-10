@@ -16,8 +16,8 @@ import { Toaster } from 'sonner'
 export default function LandingPage() {
   const router = useRouter()
   const [brief, setBrief] = useState('')
-  const [tokens, setTokens] = useState(TOKEN_COSTS.DEFAULT)
-  const [target, setTarget] = useState(TARGETS.BOTH)
+  const [tokens, setTokens] = useState<number>(TOKEN_COSTS.DEFAULT)
+  const [target, setTarget] = useState<string>(TARGETS.BOTH)
   const [showProgress, setShowProgress] = useState(false)
 
   const { createProject, loading, project, projectId } = useProject()
