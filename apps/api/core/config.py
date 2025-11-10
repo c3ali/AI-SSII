@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     # Application
     APP_NAME: str = "SSII IA Platform"
     ENVIRONMENT: str = os.getenv("NODE_ENV", "development")
-    API_PORT: int = int(os.getenv("API_PORT", "8000"))
+    API_PORT: int = int(os.getenv("PORT", os.getenv("API_PORT", "8000")))
 
     # Database
     DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql://ssii_user:ssii_pass_2024@localhost:5432/ssii_ia_platform")
