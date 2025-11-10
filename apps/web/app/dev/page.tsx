@@ -67,7 +67,7 @@ export default function DevDashboardPage() {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Mes Projets</h1>
-              <p className="text-gray-600 mt-1">Projets générés par l'IA</p>
+              <p className="text-gray-600 mt-1">Projets générés par l&apos;IA</p>
             </div>
             <Link href="/dev/new">
               <Button>+ Nouveau Projet</Button>
