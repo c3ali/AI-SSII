@@ -14,7 +14,7 @@ const mockProject = {
 
   // AI Generated Plan
   plan: {
-    overview: 'Architecture moderne d\'une plateforme e-commerce complète',
+    overview: 'Architecture moderne d&apos;une plateforme e-commerce complète',
     phases: [
       {
         name: 'Phase 1 - Setup & Authentication',

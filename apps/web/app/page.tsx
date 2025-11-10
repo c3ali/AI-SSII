@@ -46,7 +46,7 @@ export default function Home() {
             href="/dev"
             className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-colors shadow-lg"
           >
-            🔧 Tester l'Application (Sans Auth)
+            🔧 Tester l&apos;Application (Sans Auth)
           </Link>
           <Link
             href="/login"

@@ -34,7 +34,7 @@ export default function DevNewProjectPage() {
 
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Créer un Projet IA</h1>
-          <p className="text-gray-600 mt-1">Décrivez votre projet et l'IA le générera</p>
+          <p className="text-gray-600 mt-1">Décrivez votre projet et l&apos;IA le générera</p>
         </div>
 
         <Card>
@@ -84,7 +84,7 @@ export default function DevNewProjectPage() {
                   disabled={isGenerating}
                   className="flex-1"
                 >
-                  {isGenerating ? '🤖 Génération en cours...' : '🚀 Générer avec l\'IA'}
+                  {isGenerating ? '🤖 Génération en cours...' : '🚀 Générer avec l&apos;IA'}
                 </Button>
               </div>
             </form>
