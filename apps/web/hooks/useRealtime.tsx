@@ -56,12 +56,12 @@ export function useRealtime({ projectId, onEvent }: UseRealtimeOptions = {}) {
           table: 'projects',
           filter: `id=eq.${projectId}`,
         },
-        (payload) => {
+        (payload: any) => {
           const event: RealtimeEvent = {
             type: 'project_update',
             project_id: projectId,
-            status: payload.new.status,
-            progress: payload.new.progress,
+            status: payload.new?.status || 'unknown',
+            progress: payload.new?.progress,
           }
           handleEvent(event)
         }
