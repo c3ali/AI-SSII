@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { decisionService } from '@/services/decision.service'
 
 export async function POST(
   request: NextRequest,
@@ -6,13 +7,15 @@ export async function POST(
 ) {
   try {
     const body = await request.json()
-    const { approved, modifications } = body
+    const { approved, chosenOption, modifications } = body
     const { decisionId } = params
 
-    console.log(`Decision ${decisionId} response:`, { approved, modifications })
-
-    // In production, this would update the database
-    // and notify the backend to continue processing
+    // Enregistrer la réponse via le service
+    await decisionService.respondToDecision(decisionId, {
+      approved,
+      chosenOption,
+      modifications,
+    })
 
     return NextResponse.json({
       success: true,
@@ -22,9 +25,10 @@ export async function POST(
     })
   } catch (error) {
     console.error('Error in /api/v1/human-decisions/[decisionId]/respond:', error)
-    return NextResponse.json(
-      { message: 'Internal server error' },
-      { status: 500 }
-    )
+
+    const message = error instanceof Error ? error.message : 'Internal server error'
+    const status = message.includes('introuvable') || message.includes('traitée') || message.includes('dépassé') ? 400 : 500
+
+    return NextResponse.json({ message }, { status })
   }
 }
