@@ -1,6 +1,10 @@
 import prisma from '@/lib/prisma'
-import { Agent, ExecutionStatus, ProjectStatus } from '@prisma/client'
 import { realtimeService } from './realtime.service'
+
+// Types locaux pour éviter dépendance Prisma client
+export type Agent = 'DIRECTOR' | 'ARCHITECT' | 'DEVELOPER' | 'SECURITY' | 'QA' | 'DEVOPS'
+export type ExecutionStatus = 'PENDING' | 'RUNNING' | 'SUCCESS' | 'FAILED'
+export type ProjectStatus = 'DRAFT' | 'QUEUED' | 'RUNNING' | 'SUCCESS' | 'FAILED' | 'CANCELLED'
 
 /**
  * Orchestrateur central pour coordonner les 6 agents IA

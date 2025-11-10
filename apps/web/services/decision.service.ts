@@ -1,6 +1,20 @@
 import prisma from '@/lib/prisma'
-import { DecisionType, DecisionStatus } from '@prisma/client'
 import { realtimeService } from './realtime.service'
+
+// Types locaux pour éviter dépendance Prisma client
+export type DecisionType =
+  | 'STACK_CHOICE'
+  | 'ARCHITECTURE_VALIDATION'
+  | 'SECURITY_TRADE_OFF'
+  | 'COST_OPTIMIZATION'
+  | 'FEATURE_PRIORITIZATION'
+
+export type DecisionStatus =
+  | 'PENDING'
+  | 'APPROVED'
+  | 'REJECTED'
+  | 'EXPIRED'
+  | 'MODIFIED'
 
 export interface CreateDecisionInput {
   projectId: string

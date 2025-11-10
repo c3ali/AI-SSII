@@ -1,7 +1,10 @@
 import prisma from '@/lib/prisma'
-import { ProjectStatus, Agent } from '@prisma/client'
 import { agentOrchestrator } from './agent-orchestrator'
 import { queueManager } from './queue.service'
+
+// Types locaux pour éviter dépendance Prisma client
+export type ProjectStatus = 'DRAFT' | 'QUEUED' | 'RUNNING' | 'SUCCESS' | 'FAILED' | 'CANCELLED'
+export type Agent = 'DIRECTOR' | 'ARCHITECT' | 'DEVELOPER' | 'SECURITY' | 'QA' | 'DEVOPS'
 
 export interface CreateProjectInput {
   brief: string
