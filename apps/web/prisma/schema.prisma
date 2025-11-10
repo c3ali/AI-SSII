@@ -23,6 +23,7 @@ model User {
   projects      Project[]
   executions    Execution[]
   comments      Comment[]
+  decisions     HumanDecision[]
 
   // Metadata
   createdAt     DateTime  @default(now())
@@ -71,6 +72,7 @@ model Project {
   templates     Template[]
   comments      Comment[]
   files         File[]
+  decisions     HumanDecision[]
 
   // Timestamps
   startedAt     DateTime?
@@ -229,6 +231,44 @@ model File {
 }
 
 // ============================================
+// DÉCISIONS HUMAINES
+// ============================================
+model HumanDecision {
+  id            String          @id @default(cuid())
+
+  // Liens
+  projectId     String
+  project       Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId        String?
+  user          User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  // Decision type
+  type          DecisionType
+  status        DecisionStatus  @default(PENDING)
+
+  // Proposals
+  proposal      Json            // Main proposal from architect
+  alternative   Json?           // Alternative option (low-cost, etc.)
+
+  // Response
+  approved      Boolean?
+  chosenOption  String?         // "proposal" | "alternative"
+  modifications String?         @db.Text
+
+  // Timing
+  deadline      DateTime
+  respondedAt   DateTime?
+
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@index([projectId])
+  @@index([status])
+  @@index([deadline])
+  @@map("human_decisions")
+}
+
+// ============================================
 // ENUMS
 // ============================================
 enum Role {
@@ -278,4 +318,20 @@ enum TemplateCategory {
   DASHBOARD
   MOBILE
   API
+}
+
+enum DecisionType {
+  STACK_CHOICE
+  ARCHITECTURE_VALIDATION
+  SECURITY_TRADE_OFF
+  COST_OPTIMIZATION
+  FEATURE_PRIORITIZATION
+}
+
+enum DecisionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+  MODIFIED
 }
