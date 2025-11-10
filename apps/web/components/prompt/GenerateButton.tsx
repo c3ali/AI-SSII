@@ -14,7 +14,7 @@ interface GenerateButtonProps {
 const stateConfig = {
   idle: {
     icon: '🚀',
-    text: 'Générer l'application',
+    text: "Générer l'application",
     className: 'bg-primary hover:bg-primary/90',
     showSpinner: false,
   },

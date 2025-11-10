@@ -1,5 +1,6 @@
 import { DecisionPanel } from '@/components/decision/DecisionPanel'
 import { notFound } from 'next/navigation'
+import { DecisionPageClient } from './client'
 
 // Mock function - replace with actual API call
 async function getDecision(id: string) {
@@ -56,43 +57,5 @@ export default async function DecisionPage({ params }: { params: { id: string } 
     <div className="py-8">
       <DecisionPageClient decision={decision} />
     </div>
-  )
-}
-
-// Client component for interactivity
-'use client'
-
-import { useHumanDecision } from '@/hooks/useHumanDecision'
-import { useState } from 'react'
-
-function DecisionPageClient({ decision }: { decision: any }) {
-  const { approve, reject, loading, responded } = useHumanDecision(decision.id)
-  const [showModifyDialog, setShowModifyDialog] = useState(false)
-
-  const handleApprove = async () => {
-    await approve()
-  }
-
-  const handleAlternative = async () => {
-    await approve() // Alternative is also an approval with specific choice
-  }
-
-  const handleModify = () => {
-    setShowModifyDialog(true)
-    // TODO: Show modification dialog
-  }
-
-  return (
-    <DecisionPanel
-      projectName={decision.projectName}
-      proposal={decision.proposal}
-      alternative={decision.alternative}
-      deadline={decision.deadline}
-      onApprove={handleApprove}
-      onAlternative={handleAlternative}
-      onModify={handleModify}
-      loading={loading}
-      responded={responded}
-    />
   )
 }
