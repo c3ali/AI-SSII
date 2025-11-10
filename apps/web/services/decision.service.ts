@@ -49,7 +49,7 @@ class DecisionService {
         proposal,
         alternative,
         deadline,
-        status: DecisionStatus.PENDING,
+        status: 'PENDING',
       },
     })
 
@@ -93,7 +93,7 @@ class DecisionService {
     const decision = await this.getDecision(decisionId)
 
     // Vérifier que la décision est encore pending
-    if (decision.status !== DecisionStatus.PENDING) {
+    if (decision.status !== 'PENDING') {
       throw new Error('Cette décision a déjà été traitée')
     }
 
@@ -111,7 +111,7 @@ class DecisionService {
         approved,
         chosenOption,
         modifications,
-        status: approved ? DecisionStatus.APPROVED : DecisionStatus.REJECTED,
+        status: approved ? 'APPROVED' : 'REJECTED',
         respondedAt: new Date(),
       },
     })
@@ -120,7 +120,7 @@ class DecisionService {
     if (modifications) {
       await prisma.humanDecision.update({
         where: { id: decisionId },
-        data: { status: DecisionStatus.MODIFIED },
+        data: { status: 'MODIFIED' },
       })
     }
 
@@ -141,13 +141,13 @@ class DecisionService {
       where: { id: decisionId },
     })
 
-    if (!decision || decision.status !== DecisionStatus.PENDING) {
+    if (!decision || decision.status !== 'PENDING') {
       return // Déjà traitée
     }
 
     await prisma.humanDecision.update({
       where: { id: decisionId },
-      data: { status: DecisionStatus.EXPIRED },
+      data: { status: 'EXPIRED' },
     })
 
     console.log(`Decision ${decisionId} expired`)
@@ -170,7 +170,7 @@ class DecisionService {
    */
   async getPendingDecisions(projectId?: string) {
     const where: any = {
-      status: DecisionStatus.PENDING,
+      status: 'PENDING',
       deadline: { gt: new Date() },
     }
 

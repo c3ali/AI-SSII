@@ -27,7 +27,7 @@ class AgentOrchestrator {
       // Mettre à jour le statut
       await prisma.project.update({
         where: { id: projectId },
-        data: { status: ProjectStatus.RUNNING, startedAt: new Date() },
+        data: { status: 'RUNNING', startedAt: new Date() },
       })
 
       // Exécuter les agents dans l'ordre
@@ -39,7 +39,7 @@ class AgentOrchestrator {
       await prisma.project.update({
         where: { id: projectId },
         data: {
-          status: ProjectStatus.SUCCESS,
+          status: 'SUCCESS',
           completedAt: new Date(),
         },
       })
@@ -51,7 +51,7 @@ class AgentOrchestrator {
 
       await prisma.project.update({
         where: { id: projectId },
-        data: { status: ProjectStatus.FAILED },
+        data: { status: 'FAILED' },
       })
 
       throw error
@@ -84,7 +84,7 @@ class AgentOrchestrator {
       data: {
         projectId,
         agent,
-        status: ExecutionStatus.RUNNING,
+        status: 'RUNNING',
         input: this.prepareAgentInput(project, project.executions),
         logs: [],
       },
@@ -103,7 +103,7 @@ class AgentOrchestrator {
       await prisma.execution.update({
         where: { id: execution.id },
         data: {
-          status: ExecutionStatus.SUCCESS,
+          status: 'SUCCESS',
           output,
           duration,
           tokensUsed,
@@ -123,7 +123,7 @@ class AgentOrchestrator {
       await prisma.execution.update({
         where: { id: execution.id },
         data: {
-          status: ExecutionStatus.FAILED,
+          status: 'FAILED',
           error: error instanceof Error ? error.message : 'Unknown error',
           completedAt: new Date(),
         },

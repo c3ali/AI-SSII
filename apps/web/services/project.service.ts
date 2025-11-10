@@ -44,7 +44,7 @@ class ProjectService {
       data: {
         name: this.generateProjectName(brief),
         brief,
-        status: ProjectStatus.QUEUED,
+        status: 'QUEUED',
         userId: userId || 'anonymous', // Temporary for demo
         config: {
           budgetTokens,
@@ -118,7 +118,7 @@ class ProjectService {
       human_decisions: humanDecisions,
       progress,
       current_step: currentStep,
-      urls: project.status === ProjectStatus.SUCCESS
+      urls: project.status === 'SUCCESS'
         ? {
             github: project.githubUrl || undefined,
             preview: project.deployUrl || undefined,
