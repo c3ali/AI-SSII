@@ -1,0 +1,72 @@
+groups:
+  - name: web_alerts
+    interval: 30s
+    rules:
+      # Web Application Down
+      - alert: WebAppDown
+        expr: up{job="web"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: web
+        annotations:
+          summary: "Web application is down"
+          description: "Web application has been down for more than 2 minutes"
+
+      # High Error Rate
+      - alert: HighWebErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{job="web", status=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total{job="web"}[5m]))
+          ) > 0.03
+        for: 5m
+        labels:
+          severity: warning
+          component: web
+        annotations:
+          summary: "High web error rate detected"
+          description: "Web error rate is {{ $value | humanizePercentage }} (threshold: 3%)"
+
+      # Slow Page Load
+      - alert: SlowPageLoad
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket{job="web"}[5m])) by (le)
+          ) > 3
+        for: 5m
+        labels:
+          severity: warning
+          component: web
+        annotations:
+          summary: "Slow page load times detected"
+          description: "95th percentile page load time is {{ $value }}s (threshold: 3s)"
+
+      # High Memory Usage
+      - alert: HighWebMemoryUsage
+        expr: |
+          (
+            container_memory_usage_bytes{name=~".*web.*"}
+            /
+            container_spec_memory_limit_bytes{name=~".*web.*"}
+          ) * 100 > 85
+        for: 10m
+        labels:
+          severity: warning
+          component: web
+        annotations:
+          summary: "High memory usage on web application"
+          description: "Memory usage is {{ $value }}% (threshold: 85%)"
+
+      # Next.js Build Failed
+      - alert: NextJSBuildFailed
+        expr: |
+          nextjs_build_status == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: web
+        annotations:
+          summary: "Next.js build failed"
+          description: "The Next.js build process has failed"

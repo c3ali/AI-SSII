@@ -1,0 +1,98 @@
+groups:
+  - name: api_alerts
+    interval: 30s
+    rules:
+      # High Error Rate
+      - alert: HighAPIErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{job="api", status=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total{job="api"}[5m]))
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          component: api
+        annotations:
+          summary: "High API error rate detected"
+          description: "API error rate is {{ $value | humanizePercentage }} (threshold: 5%)"
+
+      # High Response Time
+      - alert: HighAPILatency
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket{job="api"}[5m])) by (le)
+          ) > 2
+        for: 5m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "High API latency detected"
+          description: "95th percentile latency is {{ $value }}s (threshold: 2s)"
+
+      # API Down
+      - alert: APIDown
+        expr: up{job="api"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: api
+        annotations:
+          summary: "API is down"
+          description: "API has been down for more than 2 minutes"
+
+      # High CPU Usage
+      - alert: HighAPICPUUsage
+        expr: |
+          100 * (1 - avg(irate(node_cpu_seconds_total{mode="idle",job="api"}[5m]))) > 80
+        for: 10m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "High CPU usage on API"
+          description: "CPU usage is {{ $value }}% (threshold: 80%)"
+
+      # High Memory Usage
+      - alert: HighAPIMemoryUsage
+        expr: |
+          (
+            node_memory_MemTotal_bytes{job="api"} - node_memory_MemAvailable_bytes{job="api"}
+          ) / node_memory_MemTotal_bytes{job="api"} * 100 > 85
+        for: 10m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "High memory usage on API"
+          description: "Memory usage is {{ $value }}% (threshold: 85%)"
+
+      # Too Many Requests
+      - alert: APITooManyRequests
+        expr: |
+          sum(rate(http_requests_total{job="api"}[1m])) > 1000
+        for: 5m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "API receiving too many requests"
+          description: "API is receiving {{ $value }} requests/second"
+
+      # Database Connection Pool Exhausted
+      - alert: DatabaseConnectionPoolExhausted
+        expr: |
+          (
+            sum(db_connections_active{job="api"})
+            /
+            sum(db_connections_max{job="api"})
+          ) > 0.9
+        for: 5m
+        labels:
+          severity: critical
+          component: api
+        annotations:
+          summary: "Database connection pool nearly exhausted"
+          description: "{{ $value | humanizePercentage }} of database connections in use"
