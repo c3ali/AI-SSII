@@ -1,5 +1,4 @@
 // apps/web/prisma/schema.prisma
-// Same schema as packages/database/prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
 }

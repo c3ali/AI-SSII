@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import './globals.css'
+import { Navigation } from '@/components/navigation'
 
 export const metadata: Metadata = {
   title: 'SSII IA Platform',
@@ -12,7 +14,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr">
-      <body>{children}</body>
+      <body className="min-h-screen bg-background font-sans antialiased">
+        <Navigation />
+        <main className="container mx-auto px-4 py-8">
+          {children}
+        </main>
+      </body>
     </html>
   )
 }
