@@ -1,0 +1,32 @@
+{
+  "name": "@ssii/llm",
+  "version": "1.0.0",
+  "description": "Multi-provider LLM system for SSII IA Platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "test": "jest"
+  },
+  "keywords": [
+    "llm",
+    "ai",
+    "openai",
+    "anthropic",
+    "multi-provider"
+  ],
+  "dependencies": {
+    "@ai-sdk/openai": "^0.0.66",
+    "@ai-sdk/anthropic": "^0.0.50",
+    "@ai-sdk/google": "^0.0.52",
+    "@ai-sdk/mistral": "^0.0.43",
+    "ai": "^3.4.29",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.6",
+    "typescript": "^5.7.2"
+  }
+}

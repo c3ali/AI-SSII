@@ -24,6 +24,9 @@ model User {
   projects      Project[]
   executions    Execution[]
   comments      Comment[]
+  apiKeys       ApiKey[]
+  providerSettings ProviderSetting[]
+  userSettings  UserSettings?
 
   // Metadata
   createdAt     DateTime  @default(now())
@@ -52,6 +55,19 @@ model Project {
   stack         Stack         @default(NEXTJS)
   budget        Float         @default(50)
   timeline      Int           @default(7) // jours
+
+  // LLM Configuration
+  selectedProvider  String?   @default("OpenAI")
+  selectedModel     String?   @default("gpt-4o")
+  modelSettings     Json?     // Temperature, max tokens, etc.
+
+  // Agent-specific models
+  directorModel     String?
+  architectModel    String?
+  developerModel    String?
+  securityModel     String?
+  qaModel           String?
+  devopsModel       String?
 
   // Outputs des agents (JSON stocké)
   plan          Json?         // Director output
@@ -112,6 +128,14 @@ model Execution {
   duration      Int?            // millisecondes
   tokensUsed    Int?
   cost          Float?
+
+  // LLM Usage Details
+  model         String?
+  provider      String?
+  promptTokens  Int?
+  completionTokens Int?
+  totalTokens   Int?
+  modelVersion  String?
 
   // Timestamps
   startedAt     DateTime        @default(now())
@@ -227,6 +251,84 @@ model File {
 
   @@index([projectId])
   @@map("files")
+}
+
+// ============================================
+// LLM PROVIDER MANAGEMENT
+// ============================================
+
+// Encrypted API keys per user and provider
+model ApiKey {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  provider    String   // 'OpenAI', 'Anthropic', 'Google', etc.
+  keyHash     String   @db.Text // Encrypted API key with IV and auth tag
+  keyPreview  String   // Last 4 characters for display
+  isActive    Boolean  @default(true)
+
+  lastUsedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, provider])
+  @@index([userId])
+  @@index([provider])
+  @@map("api_keys")
+}
+
+// Provider settings per user
+model ProviderSetting {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  provider   String   // Provider name
+  enabled    Boolean  @default(false)
+  baseUrl    String?  // Custom base URL (for Ollama, etc.)
+  settings   Json?    // Additional provider-specific settings
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([userId, provider])
+  @@index([userId])
+  @@index([provider])
+  @@map("provider_settings")
+}
+
+// Global user settings for LLM preferences
+model UserSettings {
+  id                        String   @id @default(cuid())
+  userId                    String   @unique
+  user                      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  defaultProvider           String?  @default("OpenAI")
+  defaultModel              String?  @default("gpt-4o")
+  enableContextOptimization Boolean  @default(true)
+  maxTokensPerRequest       Int?     @default(4000)
+
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+
+  @@map("user_settings")
+}
+
+// Cache for dynamic models from providers
+model ModelCache {
+  id          String   @id @default(cuid())
+  provider    String
+  cacheKey    String   // Hash of API key + settings for cache invalidation
+  models      Json     // Array of ModelInfo objects
+  expiresAt   DateTime
+
+  createdAt   DateTime @default(now())
+
+  @@unique([provider, cacheKey])
+  @@index([provider])
+  @@index([expiresAt])
+  @@map("model_cache")
 }
 
 // ============================================
